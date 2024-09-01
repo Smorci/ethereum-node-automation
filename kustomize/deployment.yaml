@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ethereum-nodes
+spec:
+  minReadySeconds: 3
+  revisionHistoryLimit: 5
+  progressDeadlineSeconds: 60
+  strategy:
+    rollingUpdate:
+      maxUnavailable: 0
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: ethereum-nodes
+  template:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9797"
+      labels:
+        app: ethereum-nodes
+    spec:
+      containers:
+      - name: execution-node-1
+        image: ghcr.io/paradigmxyz/reth
+        imagePullPolicy: IfNotPresent
+        ports:
+        - name: rpc
+          containerPort: 8545
+          protocol: TCP
+        - name: engine
+          containerPort: 8551
+          protocol: TCP
+        - name: metrics
+          containerPort: 9001
+          protocol: TCP
+        - name: peering
+          containerPort: 30303
+          protocol: TCP
+        command:
+        - node
+        - --chain mainnet
+        - --metrics 0.0.0.0:9001
+        - --log.file.directory /root/logs
+        - --authrpc.addr 0.0.0.0
+        - --authrpc.port 8551
+        - --authrpc.jwtsecret /root/jwt/jwt.hex
+        - --http --http.addr 0.0.0.0 --http.port 8545
+        - --http.api "eth,net,web3"
+        env:
+        - name: PODINFO_UI_COLOR
+          value: "#34577c"
+        livenessProbe:
+          exec:
+            command:
+            - podcli
+            - check
+            - http
+            - localhost:9898/healthz
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - podcli
+            - check
+            - http
+            - localhost:9898/readyz
+          initialDelaySeconds: 5
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 2000m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 64Mi
+        volumeMounts:
+          - name: data
+            mountPath: /data
+      volumes:
+        - name: data
+          emptyDir: {}
