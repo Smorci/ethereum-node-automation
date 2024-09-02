@@ -1,0 +1,11 @@
+---
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: GitRepository
+metadata:
+  name: ethereum-node-automation
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  ref:
+    branch: ethereum-node-automation-poc
+  url: https://github.com/Smorci/ethereum-node-automation
