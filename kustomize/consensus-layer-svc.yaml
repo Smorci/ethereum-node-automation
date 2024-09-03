@@ -7,27 +7,27 @@ spec:
   selector:
     app: consensus-layer
   ports:
-    - name: consensus-rpc
+    - name: rpc
       port: 5052
       protocol: TCP
       targetPort: rpc
-    - name: consensus-http
+    - name: http
       port: 5053
       protocol: TCP
       targetPort: http
-    - name: consensus-metrics
+    - name: metrics
       port: 5054
       protocol: TCP
       targetPort: metrics
-    - name: consensus-peeringTcp
+    - name: peeringTcp
       port: 9000
       protocol: TCP
       targetPort: peeringTcp
-    - name: consensus-peeringUdp
+    - name: peeringUdp
       port: 9000
       protocol: UDP
       targetPort: peeringUdp
-    - name: consensus-peering
+    - name: peering
       port: 9001
       protocol: UDP
       targetPort: peering

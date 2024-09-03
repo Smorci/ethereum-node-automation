@@ -6,4 +6,4 @@ resources:
   - execution-layer.yaml
   - consensus-layer.yaml
   - execution-layer-svc.yaml
-  - execution-layer-svc.yaml
+  - consensus-layer-svc.yaml
