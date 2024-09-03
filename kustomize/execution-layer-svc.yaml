@@ -7,19 +7,19 @@ spec:
   selector:
     app: execution-layer
   ports:
-    - name: rpc
+    - name: execution-rpc
       port: 8545
       protocol: TCP
       targetPort: rpc
-    - name: engine
+    - name: execution-engine
       port: 8551
       protocol: TCP
       targetPort: engine
-    - name: metrics
+    - name: execution-metrics
       port: 5055
       protocol: TCP
       targetPort: metrics
-    - name: peering
+    - name: execution-peering
       port: 30303
       protocol: TCP
       targetPort: peering
