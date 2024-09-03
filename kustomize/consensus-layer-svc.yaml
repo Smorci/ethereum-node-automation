@@ -19,14 +19,14 @@ spec:
       port: 5054
       protocol: TCP
       targetPort: metrics
-    - name: peeringTcp
+    - name: peering-tcp
       port: 9000
       protocol: TCP
-      targetPort: peeringtcp
-    - name: peeringUdp
+      targetPort: peering-tcp
+    - name: peering-udp
       port: 9000
       protocol: UDP
-      targetPort: peeringudp
+      targetPort: peering-udp
     - name: peering
       port: 9001
       protocol: UDP
