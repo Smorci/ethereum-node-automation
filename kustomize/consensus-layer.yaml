@@ -31,6 +31,7 @@ spec:
           mountPath: /mnt/scripts
         - name: jwt-token-volume
           mountPath: /mnt/jwt
+      containers:
       - name: lighthouse
         image: sigp/lighthouse:v5.1.3-modern
         imagePullPolicy: IfNotPresent
@@ -44,10 +45,10 @@ spec:
         - name: metrics
           containerPort: 5054
           protocol: TCP
-        - name: peeringTcp
+        - name: peering-tcp
           containerPort: 9000
           protocol: TCP
-        - name: peeringUdp
+        - name: peering-udp
           containerPort: 9000
           protocol: UDP
         - name: peering
