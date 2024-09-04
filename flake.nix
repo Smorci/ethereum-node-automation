@@ -11,7 +11,7 @@
       in
       {
         devShell = with pkgs; mkShell {
-          buildInputs = [ fluxcd fluxctl kind kubectx kubectl ];
+          buildInputs = [ fluxcd fluxctl kind kubectx kubectl git openssl ];
         };
       }
     );
