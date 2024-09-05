@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      labels:
+        app: grafana
+    spec:
+      initContainers:
+        - name: grafana-dashboards
+          image: alpine:latest
+          command: ["/bin/sh", "-c", "source /mnt/scripts/download-dashboards.sh"]
+          volumeMounts:
+            - name: download-dashboards
+              mountPath: /mnt/scripts
+            - name: grafana-storage
+              mountPath: /var/lib/grafana
+      containers:
+        - name: grafana
+          image: grafana/grafana:10.0.0
+          ports:
+            - containerPort: 3000
+          env:
+            - name: GF_SECURITY_ADMIN_PASSWORD
+              value: admin
+          volumeMounts:
+            - name: grafana-storage
+              mountPath: /var/lib/grafana
+            - name: grafana-datasource-volume
+              mountPath: /etc/grafana/provisioning/datasources
+            - name: grafana-dashboards-volume
+              mountPath: /etc/grafana/provisioning/dashboards
+      volumes:
+        - name: grafana-storage
+          emptyDir: {}
+        - name: grafana-datasource-volume
+          configMap:
+            name: grafana-datasources
+        - name: grafana-dashboards-volume
+          configMap:
+            name: grafana-dashboard-providers
+        - name: download-dashboards
+          configMap:
+            name: download-dashboards
+            defaultMode: 0770

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: download-dashboards
+  labels:
+    app: grafana
+data:
+  download-dashboards.sh: |
+    #!/bin/sh
+
+    apk add --no-cache curl sed
+
+    if [[ ! -d /var/lib/grafana/dashboards ]]; then
+      mkdir -p /var/lib/grafana/dashboards
+    fi
+
+    curl https://grafana.com/api/dashboards/315/revisions/latest/download -o /var/lib/grafana/dashboards/kubernetes-dashboard.json
+    curl https://raw.githubusercontent.com/paradigmxyz/reth/main/etc/grafana/dashboards/overview.json -o /var/lib/grafana/dashboards/overview.json
+    sed -i 's/\${DS_PROMETHEUS}/DS_PROMETHEUS/g' /var/lib/grafana/dashboards/kubernetes-dashboard.json /var/lib/grafana/dashboards/overview.json
