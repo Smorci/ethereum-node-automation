@@ -6,6 +6,18 @@ kind create cluster --name ethereum-nodes
 ```
 
 ```
+./scripts/generate-token.sh 
+```
+
+```
+kubectl create namespace ethereum-node-automation
+```
+
+```
+kubens ethereum-node-automation
+```
+
+```
 flux bootstrap github \
   --owner=$GITHUB_USER \
   --repository=ethereum-node-automation \
