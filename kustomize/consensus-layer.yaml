@@ -3,13 +3,7 @@ kind: Deployment
 metadata:
   name: consensus-layer
 spec:
-  minReadySeconds: 3
-  revisionHistoryLimit: 5
-  progressDeadlineSeconds: 60
-  strategy:
-    rollingUpdate:
-      maxUnavailable: 0
-    type: RollingUpdate
+  replicas: 1
   selector:
     matchLabels:
       app: consensus-layer
@@ -18,6 +12,7 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "5054"
+        prometheus.io/path: "/metrics"
       labels:
         app: consensus-layer
     spec:
@@ -26,53 +21,47 @@ spec:
         runAsGroup: 1001
         fsGroup: 1001
       containers:
-      - name: lighthouse
-        image: sigp/lighthouse:v5.1.3-modern
-        imagePullPolicy: IfNotPresent
-        ports:
-        - name: rpc
-          containerPort: 5052
-          protocol: TCP
-        - name: http
-          containerPort: 5053
-          protocol: TCP
-        - name: metrics
-          containerPort: 5054
-          protocol: TCP
-        - name: peering-tcp
-          containerPort: 9000
-          protocol: TCP
-        - name: peering-udp
-          containerPort: 9000
-          protocol: UDP
-        - name: peering
-          containerPort: 9001
-          protocol: UDP
-        command: ["/bin/sh", "-c"]
-        args:
-          - >
-            lighthouse bn
-            --network mainnet
-            --http --http-address 0.0.0.0
-            --execution-endpoint http://execution-layer-svc:8551
-            --metrics --metrics-address 0.0.0.0
-            --execution-jwt /mnt/token/jwt
-            --checkpoint-sync-url https://mainnet.checkpoint.sigp.io
-        resources:
-          limits:
-            cpu: 3000m
-            memory: 10240Mi
-          requests:
-            cpu: 2000m
-            memory: 8192Mi
-        volumeMounts:
-          - name: jwt-secret-volume
-            readOnly: true
-            mountPath: /mnt/token
-          - name: logs
-            mountPath: /logs
-          - name: lighthouse
-            mountPath: /.lighthouse
+        - name: lighthouse
+          image: sigp/lighthouse:v5.1.3-modern
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: rpc
+              containerPort: 5052
+              protocol: TCP
+            - name: http
+              containerPort: 5053
+              protocol: TCP
+            - name: metrics
+              containerPort: 5054
+              protocol: TCP
+            - name: peering-tcp
+              containerPort: 9000
+              protocol: TCP
+            - name: peering-udp
+              containerPort: 9000
+              protocol: UDP
+            - name: peering
+              containerPort: 9001
+              protocol: UDP
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              lighthouse bn --network mainnet --http --http-address 0.0.0.0 --execution-endpoint http://execution-layer:8551 --metrics --metrics-address 0.0.0.0 --metrics-port 5054 --execution-jwt /mnt/token/jwt --checkpoint-sync-url https://mainnet.checkpoint.sigp.io
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 10240Mi
+            requests:
+              cpu: 1000m
+              memory: 6144Mi
+          volumeMounts:
+            - name: jwt-secret-volume
+              readOnly: true
+              mountPath: /mnt/token
+            - name: logs
+              mountPath: /logs
+            - name: lighthouse
+              mountPath: /.lighthouse
       volumes:
         - name: jwt-secret-volume
           secret:
@@ -82,4 +71,3 @@ spec:
           emptyDir: {}
         - name: lighthouse
           emptyDir: {}
- 

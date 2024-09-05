@@ -3,13 +3,7 @@ kind: Deployment
 metadata:
   name: execution-layer
 spec:
-  minReadySeconds: 3
-  revisionHistoryLimit: 5
-  progressDeadlineSeconds: 60
-  strategy:
-    rollingUpdate:
-      maxUnavailable: 0
-    type: RollingUpdate
+  replicas: 1
   selector:
     matchLabels:
       app: execution-layer
@@ -18,6 +12,7 @@ spec:
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/port: "5055"
+        prometheus.io/path: "/"
       labels:
         app: execution-layer
     spec:
@@ -26,50 +21,41 @@ spec:
         runAsGroup: 1001
         fsGroup: 1001
       containers:
-      - name: reth
-        image: ghcr.io/paradigmxyz/reth
-        imagePullPolicy: IfNotPresent
-        ports:
-        - name: rpc
-          containerPort: 8545
-          protocol: TCP
-        - name: engine
-          containerPort: 8551
-          protocol: TCP
-        - name: metrics
-          containerPort: 5055
-          protocol: TCP
-        - name: peering
-          containerPort: 30303
-          protocol: TCP
-        command: ["/bin/sh", "-c"]
-        args:
-          - >
-            reth node                                         
-            --chain mainnet
-            --metrics 0.0.0.0:5054
-            --log.file.directory /logs
-            --authrpc.addr 0.0.0.0               
-            --authrpc.port 8551                        
-            --authrpc.jwtsecret /mnt/token/jwt
-            --http --http.addr 0.0.0.0 --http.port 8545
-            --http.api "eth,net,web3"   
-#        command: ["sh", "-c", "sleep infinity"]
-        resources:
-          limits:
-            cpu: 3000m
-            memory: 10240Mi
-          requests:
-            cpu: 2000m
-            memory: 8192Mi
-        volumeMounts:
-          - name: jwt-secret-volume
-            readOnly: true
-            mountPath: /mnt/token
-          - name: logs
-            mountPath: /logs
-          - name: local
-            mountPath: /.local
+        - name: reth
+          image: ghcr.io/paradigmxyz/reth
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: rpc
+              containerPort: 8545
+              protocol: TCP
+            - name: engine
+              containerPort: 8551
+              protocol: TCP
+            - name: metrics
+              containerPort: 5055
+              protocol: TCP
+            - name: peering
+              containerPort: 30303
+              protocol: TCP
+          command: ["/bin/sh", "-c"]
+          args:
+            - >
+              reth node --chain mainnet --metrics 0.0.0.0:5055 --log.file.directory /logs --authrpc.addr 0.0.0.0 --authrpc.port 8551 --authrpc.jwtsecret /mnt/token/jwt --http --http.addr 0.0.0.0 --http.port 8545 --http.api "eth,net,web3"
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 6144Mi
+            requests:
+              cpu: 1000m
+              memory: 4096Mi
+          volumeMounts:
+            - name: jwt-secret-volume
+              readOnly: true
+              mountPath: /mnt/token
+            - name: logs
+              mountPath: /logs
+            - name: local
+              mountPath: /.local
       volumes:
         - name: jwt-secret-volume
           secret:
@@ -79,5 +65,3 @@ spec:
           emptyDir: {}
         - name: local
           emptyDir: {}
-
-
