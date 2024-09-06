@@ -4,12 +4,21 @@ Simple to use, packaged, continuously deployed solution to start 3 monitored eth
 ## Pre-requisite
 1.Nix version 2.18.2 or higher. Follow the [installation instructions](https://nix.dev/install-nix.html) for your operating system.
 2. Github personal access token. Follow the [official documentation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic) or take a look at the detailed application specific documentation in this repository.
+3. Direnv. Follow the [installation instructions](https://direnv.net/docs/installation.html)
 
 ## `.env` file
 Create a `.env` file in the repository root, adding your github access token
 ```
 export GITHUB_TOKEN=<your-github-access-token>
 ```
+
+## Devshell
+If you would like to use the development shell provided by the nix flake, run:
+```
+direnv allow
+```
+
+In the shell you can use tools such as `kind` `flux` `kubectl` and `kubectx`
 
 ## Usage
 ### Bootstrap cluster
@@ -36,6 +45,8 @@ To see the status of the deployment, run:
 ```
 flux get kustomizations
 ```
+
+
 
 ## Monitoring
 After deploying the applications, there will be a Grafana and a Prometheus deployment in the namespace. To access the Grafan UI, you should port-forward the HTTP port of Grafana:
