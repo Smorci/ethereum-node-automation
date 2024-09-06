@@ -1,66 +1,55 @@
-# ethereum-node-automation
-Simple to use, packaged, continuously deployed solution to start 3 monitored ethereum nodes in your local environment
+# Ethereum Node Automation
+Simple to use, packaged, continuously deployed solution to start 3 monitored ethereum nodes in your local environment.
 
 ## Pre-requisite
 1.Nix version 2.18.2 or higher. Follow the [installation instructions](https://nix.dev/install-nix.html) for your operating system.
 2. Github personal access token. Follow the [official documentation](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic) or take a look at the detailed application specific documentation in this repository.
 
 ## `.env` file
-
 Create a `.env` file in the repository root, adding your github access token
 ```
 export GITHUB_TOKEN=<your-github-access-token>
 ```
-> Replace `<your-github-access-token>` with the generated access token in *pre-requisite* section
 
 ## Usage
+### Bootstrap cluster
+To start a kubernetes cluster and deploy 3 ethereum [full nodes](https://ethereum.org/en/developers/docs/nodes-and-clients/#what-are-nodes-and-clients) (two clients each), grafana and prometheus in the *ethereum-node-automation* namespace, run: 
+```
+nix run
+```
+This will start each deployment and continuously sync with the *main* branch of this repository, with Flux
 
+### Delete cluster
+To stop and destroy the cluster on your local machine, you can run:
 ```
-kind create cluster --name ethereum-nodes
-```
-
-```
-./scripts/generate-token.sh 
-```
-
-```
-kubectl create namespace ethereum-node-automation
-```
-
-```
-kubens ethereum-node-automation
+nix run .#delete
 ```
 
+### Suspend Flux continuous deployment
+To stop Flux from continuously syncing the cluster, you can suspend the Flux kustomization, run:
 ```
-flux bootstrap github \
-  --owner=$GITHUB_USER \
-  --repository=ethereum-node-automation \
-  --branch=main \
-  --path=./clusters/ethereum-node-automation \
-  --personal 
+flux suspend kustomization ethereum-node-automation
 ```
 
+### Get Flux continuous deployment status
+To see the status of the deployment, run:
 ```
-flux create source git ethereum-node-automation \   
-  --url=https://github.com/Smorci/ethereum-node-automation \
-  --branch=main \
-  --interval=1m \
-  --export > ./clusters/ethereum-node-automation/ethereum-node-automation-source.yaml
+flux get kustomizations
 ```
 
+## Monitoring
+After deploying the applications, there will be a Grafana and a Prometheus deployment in the namespace. To access the Grafan UI, you should port-forward the HTTP port of Grafana:
 ```
-flux create kustomization ethereum-node-automation \
-  --target-namespace=ethereum-node-automation \
-  --source=ethereum-node-automation \
-  --path="./kustomize" \
-  --prune=true \
-  --wait=true \
-  --interval=30m \
-  --retry-interval=2m \
-  --health-check-timeout=3m \
-  --export > ./clusters/ethereum-node-automation/ethereum-node-automation-kustomization.yaml
+kubectl port-forward svc/grafana 3000:3000
 ```
+After that you can access the UI from your browser at `localhost:3000`.
 
-```
-flux get kustomizations --watch
-```
+The password for the admin user is `admin`. After logging in it is advised to update the password.
+
+The instance is provisioned with two dashboards that use Prometheus as a datasource. Prometheus is configured to scrape data from the ethereum clients themselves and the kubernetes resources.
+
+## More details
+If you would wish to read more about implementation details check out the detailed documentation in the docs folder.
+
+## Contributing 
+Contributions are welcome, feel free to open a discussion on the repository.
